@@ -1,0 +1,155 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  ENTRY_FEE
+  PRIZE
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  REJECTED
+}
+
+enum TournamentStatus {
+  UPCOMING
+  ACTIVE
+  COMPLETED
+}
+
+// Model que representa um usuário/corredor.
+model User {
+  id              Int      @id @default(autoincrement())
+  name            String
+  email           String?  @unique
+  phone           String?  @unique
+  password        String
+  role            Role     @default(USER)
+  pixKey          String?  // Chave PIX para saques
+  balance         Float    @default(0.0) // Saldo financeiro na carteira interna
+  avatarUrl       String?
+  bio             String?
+  runs            Run[]
+  transactions    Transaction[]
+  tournaments     TournamentParticipant[]
+  segmentEfforts  SegmentEffort[]
+  createdAt       DateTime @default(now())
+}
+
+// Model para controle financeiro (Carteira)
+model Transaction {
+  id        Int               @id @default(autoincrement())
+  userId    Int
+  user      User              @relation(fields: [userId], references: [id])
+  amount    Float
+  type      TransactionType
+  status    TransactionStatus @default(PENDING)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+}
+
+enum PrizeType {
+  FIXED
+  PERCENTAGE
+}
+
+// Model que representa um Torneio de quilometragem
+model Tournament {
+  id              Int                    @id @default(autoincrement())
+  name            String
+  description     String?
+  entryFee        Float                  @default(0.0)
+  prizePool       Float                  @default(0.0) // Usado se for PERCENTAGE
+  prizeType       PrizeType              @default(PERCENTAGE)
+  fixedPrizeValue Float?                 // Usado se for FIXED
+  maxParticipants Int?                   // null = sem limite
+  status          TournamentStatus       @default(UPCOMING)
+  startDate       DateTime
+  endDate         DateTime
+  startHour       Int                    @default(0) // Hora do dia que pode começar a correr (0-23)
+  endHour         Int                    @default(23) // Hora do dia que encerra a permissão (0-23)
+  participants    TournamentParticipant[]
+  runs            Run[]
+  createdAt       DateTime               @default(now())
+}
+
+// Participantes do torneio (Relação N:N com métricas acumuladas)
+model TournamentParticipant {
+  id            Int        @id @default(autoincrement())
+  userId        Int
+  user          User       @relation(fields: [userId], references: [id])
+  tournamentId  Int
+  tournament    Tournament @relation(fields: [tournamentId], references: [id])
+  totalDistance Float      @default(0.0) // Distância acumulada no torneio em metros
+  joinedAt      DateTime   @default(now())
+
+  @@unique([userId, tournamentId])
+}
+
+// Model que representa o registro de uma corrida.
+model Run {
+  id               Int         @id @default(autoincrement())
+  userId           Int
+  user             User        @relation(fields: [userId], references: [id])
+  tournamentId     Int?        // Opcional: vincula a corrida a um torneio específico
+  tournament       Tournament? @relation(fields: [tournamentId], references: [id])
+  distance         Float       // Distância em metros
+  duration         Int         // Duração em segundos
+  averagePace      Float?      // Ritmo médio (min/km)
+  route            String?     // JSON stringificado contendo o array de coordenadas
+  mapScreenshotUrl String?  
+  segmentEfforts   SegmentEffort[]
+  createdAt        DateTime    @default(now())
+}
+
+// Model que representa um segmento de corrida (trecho específico).
+model Segment {
+  id             Int      @id @default(autoincrement())
+  name           String
+  distance       Float
+  startLat       Float
+  startLng       Float
+  endLat         Float
+  endLng         Float
+  route          String   // JSON contendo as coordenadas do trecho
+  efforts        SegmentEffort[]
+  createdAt      DateTime @default(now())
+}
+
+// Model que registra o desempenho de um usuário em um segmento.
+model SegmentEffort {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  segmentId   Int
+  segment     Segment  @relation(fields: [segmentId], references: [id])
+  runId       Int
+  run         Run      @relation(fields: [runId], references: [id])
+  elapsedTime Int      // Tempo que levou para completar o segmento (em segundos)
+  createdAt   DateTime @default(now())
+}
+
+// Model para Avisos do Sistema na Home
+model Announcement {
+  id        Int      @id @default(autoincrement())
+  message   String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}

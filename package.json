@@ -1,0 +1,27 @@
+{
+  "name": "app-de-corrida",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm start --prefix frontend",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Paulo-Cesar102/App-de-Corrida.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Paulo-Cesar102/App-de-Corrida/issues"
+  },
+  "homepage": "https://github.com/Paulo-Cesar102/App-de-Corrida#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
