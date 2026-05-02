@@ -1,4 +1,4 @@
-const prisma = require('../../database/index');
+const prisma = require('../../prisma/index');
 
 class TournamentRepository {
   async create(data) {

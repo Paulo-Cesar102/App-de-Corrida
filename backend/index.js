@@ -26,7 +26,7 @@ const io = new Server(server, {
 
 app.use(cors());
 app.use(express.json()); // Permite ler JSON no body
-app.use(loggerMiddleware); // Aplica o middleware globalmente
+app.use(loggerMiddleware); // Aplica o middleware globalmente.
 
 // Configuração de Rotas
 app.use('/api/auth', authRoutes);
