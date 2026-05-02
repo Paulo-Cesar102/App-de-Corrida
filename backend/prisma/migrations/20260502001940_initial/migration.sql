@@ -1,0 +1,9 @@
+-- CreateEnum
+CREATE TYPE "PrizeType" AS ENUM ('FIXED', 'PERCENTAGE');
+
+-- AlterTable
+ALTER TABLE "Tournament" ADD COLUMN     "endHour" INTEGER NOT NULL DEFAULT 23,
+ADD COLUMN     "fixedPrizeValue" DOUBLE PRECISION,
+ADD COLUMN     "maxParticipants" INTEGER,
+ADD COLUMN     "prizeType" "PrizeType" NOT NULL DEFAULT 'PERCENTAGE',
+ADD COLUMN     "startHour" INTEGER NOT NULL DEFAULT 0;
