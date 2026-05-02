@@ -36,6 +36,10 @@ app.use('/api/wallet', transactionRoutes);
 app.use('/api/tournaments', tournamentRoutes);
 app.use('/api/announcements', announcementRoutes);
 
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date() });
+});
+
 // Socket.io - Gerenciamento de Conexões em Tempo Real
 io.on('connection', (socket) => {
   console.log(`[Socket] Novo cliente conectado: ${socket.id}`);
